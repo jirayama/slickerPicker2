@@ -9,7 +9,8 @@ Include slickerPicker.js and slickerPicker.css
 <link rel="stylesheet" href="slickerPicker.css">
 ```
 
-Instantiate slickerPicker with the ID of the target element. 
+Instantiate slickerPicker.<br>
+**slickerPicker will only accept 1 parameter of an option object**
 You cannot attach it to an input element. 
 
 ```javascript
