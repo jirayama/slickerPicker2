@@ -1,4 +1,4 @@
-# slickerPicker
+# slickerPicker (beta version)
 A simple and quick color picker plugin made in vanilla Javascript
 
 Setting up the plugin
