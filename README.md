@@ -10,9 +10,8 @@ Include slickerPicker.js and slickerPicker.css
 ```
 
 Instantiate slickerPicker.<br>
-**slickerPicker will only accept 1 parameter of an option object**
-You cannot attach it to an input element. 
-
+**slickerPicker will only accept 1 parameter of an option object**<br>
+You MUST include a target ID of the element you want to attach the picker to.
 ```javascript
 new slickerPicker({ target: "target" });
 ```
