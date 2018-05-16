@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+
+<!--   <script type="text/javascript" src="slickerPicker.js"></script> -->
+  <link rel="stylesheet" href="sp.css">
+      <script type="text/javascript" src="DOMhelper.js"></script>
+           <script type="text/javascript" src="sp.js"></script>
+           <script type="text/javascript" src="colorConverters.js"></script>
+</head>
+<body>
+  <label for="">Pick a color</label>
+	<input id="inputTest" type="text" ><span id="sp1"></span>
+  <br>
+  <br>
+  
+ 
+ <span id="sp2"></span> 
+ <div  id="backgroundTest" style="display: inline-flex ;width: 200px; height: 50px; align-items: center; justify-content: center">HELLO WORLD!</div>
+  <br>
+  <br>
+ 
+<h2 id="textTest"></h2>
+ <div id="sp3"></div>
+	 
+	</div>
+</body>
+<script>
+
+
+
+new sp({
+  target:"sp1",
+  outputTarget: "inputTest",
+  hue: 30,
+  rgba: [15,50,242,1]     
+});
+
+new sp({
+  target:"sp2",
+  hue: 130,
+  outputTarget: "backgroundTest",
+  outputType: "background",
+  rgba: [98,205,60,1]
+});
+
+new sp({
+  target:"sp3",
+  outputTarget: "textTest",
+  outputType: "text",
+  rgba: [50,50,50,1]
+});
+
+</script>
+</html>
