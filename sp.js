@@ -22,6 +22,23 @@ function sp(opt) {
   	console.log("current_rgb", current_rgb)
   }
 
+  function xy2hsl(pos){
+    var width = 200,
+        height = 130,
+        startS = Math.easeOutExpo(pos.y, 100, -100, height),
+        startL = Math.linearTween(pos.y, 100, -100, height),
+        endL = Math.easeOutQuad(pos.y, 50, -50, height*2),
+        s = Math.linearTween(pos.x, startS, (100 - startS), width),
+        l = Math.easeOutQuad(pos.x, startL, -(startL - endL), width);  
+    var hsl =  [current_h, Math.round(s), Math.round(l)],
+        rgb = hsl2rbg(hsl[0],hsl[1],hsl[2]),
+        hex =  rgbToHex(rgb),
+        rgbString = rgba2string(rgb, current_a),
+        hslString= "hsl("+ hsl[0] +","+ hsl[1] +"%,"+ hsl[2] +"%)";
+
+    console.log({rgb:rgb, hsl:hsl, hex:hex, rgbString:rgbString, hslString:hslString}) ;
+  }
+
   function findMatchingXY(targetRed,targetGreen,targetBlue,tolerance){
   	tolerance = tolerance || 1;
   	var cw = 200,
@@ -273,62 +290,85 @@ function sp(opt) {
     return -c / 2 * (t * (t - 2) - 1) + b;
   };
   Math.easeOutExpo = function(t, b, c, d) {
-    return c * (-Math.pow(2, -10 * t / d) + 1) + b;
+    return c * (-Math.pow(500, -3 * t / d) + 1.2) + b;
   };
   Math.easeOutExpoSuper = function(t, b, c, d) {
-    return c * (-Math.pow(10, -3 * t / d) + 1) + b;
+    return c * (-Math.pow(10, -60 * t / d) + 2) + b;
   };
   Math.linearTween = function(t, b, c, d) {
     return c * t / d + b;
   };
-  // actions
-  function draw_colorPicker(h) {
-    h = h || current_h;
-    // if(h===0)h=1;
-    var s = 0,
-      l = 100,
-      endL = 50,
-      startL = 100,
-      startS = 100,
-      endS = 100,
-      x = 0,
-      y = 0,
-      width = 200,
-      height = 130;;
-    var imageData = colorPicker_ctx.getImageData(0, 0, width, height);
-    var buf = new ArrayBuffer(imageData.data.length);
-    var buf8 = new Uint8ClampedArray(buf);
-    var data = new Uint32Array(buf);
-    for (y = 0; y < height; y++) {
-      for (x = 0; x < width; x++) {
-        s = Math.easeInOutQuad(x, startS, (100 - startS), width);
-        l = Math.easeOutQuad(x, startL, -(startL - endL), width);
-        var rgb = hsl2rbg(h, s, l);
-        if(( s >50 && s<51) || ( s >25 && s<26) || ( s >75 && s<76) || ( l >50 && l<51)){
-        	data[y * width + x] = (255 << 24) | // alpha
-          (255 << 16) | // blue
-          (255 << 8) | // green
-          255; // red
-        } else {
-        	data[y * width + x] = (255 << 24) | // alpha
-          (rgb[2] << 16) | // blue
-          (rgb[1] << 8) | // green
-          rgb[0]; // red
-        }
 
-        data[y * width + x] = (255 << 24) | // alpha
-          (rgb[2] << 16) | // blue
-          (rgb[1] << 8) | // green
-          rgb[0]; // red
-        
-      }
-      startS = Math.easeOutExpo(y, 100, -100, height);
-      startL = Math.linearTween(y, 100, -100, height);
-      endL = Math.easeOutQuad(y, 50, -50, height*2);
-    }
-    imageData.data.set(buf8);
-    colorPicker_ctx.putImageData(imageData, 0, 0);
+  function draw_colorPicker(hue) {
+    hue = hue || current_h;
+
+    var width = 200,
+        height = 130;
+
+    var lumGrad = colorPicker_ctx.createLinearGradient(0, 0, 0, height);
+    lumGrad.addColorStop(0, "white");
+    lumGrad.addColorStop(0.01, "white");
+    lumGrad.addColorStop(1, "black");
+    var hueGrad = colorPicker_ctx.createLinearGradient(0, 0, width, 0);
+    hueGrad.addColorStop(0, `hsla(${hue},100%,50%,0)`);
+    hueGrad.addColorStop(1, `hsla(${hue},100%,50%,1)`);
+
+    colorPicker_ctx.fillStyle = lumGrad;  
+    colorPicker_ctx.fillRect(0, 0, width, height);
+    colorPicker_ctx.fillStyle = hueGrad;
+    colorPicker_ctx.globalCompositeOperation = "multiply";
+    colorPicker_ctx.fillRect(0, 0, width, height);
+    colorPicker_ctx.globalCompositeOperation = "source-over";
   }
+
+  // actions
+  // function draw_colorPicker(h) {
+  //   h = h || current_h;
+  //   // if(h===0)h=1;
+  //   var s = 0,
+  //     l = 100,
+  //     endL = 50,
+  //     startL = 100,
+  //     startS = 100,
+  //     endS = 100,
+  //     x = 0,
+  //     y = 0,
+  //     width = 200,
+  //     height = 130;
+  //   var imageData = colorPicker_ctx.getImageData(0, 0, width, height);
+  //   var buf = new ArrayBuffer(imageData.data.length);
+  //   var buf8 = new Uint8ClampedArray(buf);
+  //   var data = new Uint32Array(buf);
+  //   for (y = 0; y < height; y++) {
+  //     for (x = 0; x < width; x++) {
+  //       s = Math.easeOutQuad(x, startS, (100 - startS), width);
+  //       l = Math.easeOutQuad(x, startL, -(startL - endL), width);
+  //       var rgb = hsl2rbg(h, s, l);
+  //       if(( s >50 && s<51) || ( s >25 && s<26) || ( s >75 && s<76) || s>99 || s<1 ){
+  //       	data[y * width + x] = (255 << 24) | // alpha
+  //         (255 << 16) | // blue
+  //         (255 << 8) | // green
+  //         255; // red
+  //       } else {
+  //       	data[y * width + x] = (255 << 24) | // alpha
+  //         (rgb[2] << 16) | // blue
+  //         (rgb[1] << 8) | // green
+  //         rgb[0]; // red
+  //       }
+
+  //       data[y * width + x] = (255 << 24) | // alpha
+  //         (rgb[2] << 16) | // blue
+  //         (rgb[1] << 8) | // green
+  //         rgb[0]; // red
+        
+  //     }
+  //     startS = Math.easeOutExpo(y, 100, -100, height);
+  //     startL = Math.linearTween(y, 100, -100, height);
+  //     endL = Math.linearTween(y, 50, -50, height);
+  //   }
+  //   imageData.data.set(buf8);
+  //   colorPicker_ctx.putImageData(imageData, 0, 0);
+  // }
 
   function draw_huePicker() {
     var width = 198,
@@ -409,6 +449,7 @@ function sp(opt) {
     update_readout_display();
     draw_shades();
     outoutValue();
+    xy2hsl(current_pos);
   }
 
   function update_selected(pos) {
@@ -417,7 +458,7 @@ function sp(opt) {
     draw_shades();
     update_readout_display();
     draw_alphaPicker();
-    draw_shades();
+    draw_shades();    
   }
   // event listeners
   readout_change.addEventListener('click', function() {
@@ -486,6 +527,7 @@ function sp(opt) {
         y: y
       });
       set_bgc_RGBA(sp_btnInner, shades[current_shade]);
+      xy2hsl(current_pos);
     } else if (pointer_start === "huePicker" && pointer_status === 1) {
       if (y > 18) y = 18;
       if (x > 200) x = 200;
@@ -495,6 +537,7 @@ function sp(opt) {
       // console.log(current_h, Math.round(x*(360/200)))
       update_hue_change(Math.round(x * (360 / 200)));
       set_bgc_RGBA(sp_btnInner, shades[current_shade]);
+      xy2hsl(current_pos);
     } else if (pointer_start === "alphaPicker" && pointer_status === 1) {
       var temp_a = precisionRound(x / 2 / 95, 3);
       if (temp_a > 1) temp_a = 1;
@@ -507,6 +550,7 @@ function sp(opt) {
       knob_ap.style.transform = "translateX(" + x + "px)";
       update_alpha_change();
       set_bgc_RGBA(sp_btnInner, shades[current_shade]);
+      xy2hsl(current_pos);
     }
   }
   module.addEventListener('pointerdown', function(e) {
